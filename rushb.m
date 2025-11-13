@@ -1,43 +1,60 @@
-global brick forwardSpeed turnSpeed
-disp(brick)
-brick = evalin('base', 'brick');
+global key
+InitKeyboard();
 
 forwardSpeed = 100;
 turnSpeed = 50;
 
-f = figure('KeyPressFcn', @keyControl, 'KeyReleaseFcn', @keyRelease);
-disp('Click the figure and use WASD to move, Q to stop. Press ESC or close figure to quit.');
+brick.SetColorMode(3, 2);
 
-function keyControl(~, event)
-    global brick forwardSpeed turnSpeed
+v = brick.GetBattVoltage();
+disp(v)
 
-    switch event.Key
+while true
+    pause(0.01)
+
+    touch = brick.TouchPressed(1) && brick.TouchPressed(2);
+    if touch
+        brick.playTone(100,1000,10);
+    end    
+
+    color = brick.ColorCode(3);
+    if color == 5
+        speedCap = 66;
+    elseif color == 4
+        speedCap = 33;
+    else
+        speedCap = 100;
+    end
+
+
+    if key == 0
+        brick.StopAllMotors();
+        continue
+    end
+   
+    pause(0.1);
+    switch key
         case 'w'
-            brick.MoveMotor('AB', forwardSpeed);
+            disp('Up Arrow Pressed!');
+            brick.MoveMotor('AB', min(forwardSpeed, speedCap));
         case 's'
-            brick.MoveMotor('AB', 0.33 * -forwardSpeed);
-            brick.beep(5000, 300);
-            brick.beep();
-        case 'd'
-            brick.MoveMotor('A', 0.5 * turnSpeed);
-            brick.MoveMotor('B', turnSpeed);
+            disp('Down Arrow Pressed!');
+            brick.MoveMotor('AB', -0.33 * min(forwardSpeed, speedCap));
+            brick.playTone(100, 1000, 10);
         case 'a'
+            disp('Left Arrow Pressed!');
             brick.MoveMotor('A', turnSpeed);
             brick.MoveMotor('B', 0.5 * turnSpeed);
-        case 'q' 
-            brick.StopAllMotors();
+        case 'd'
+            disp('Right Arrow Pressed!');
+            brick.MoveMotor('A', 0.5 * turnSpeed);
+            brick.MoveMotor('B', turnSpeed);
+        case 'q'
+            disp('Stopping.')
+            DisconnectBrick(brick);
+            clear brick
+            break
     end
 end
 
-function keyRelease(~, ~)
-    global brick
-    brick.StopAllMotors();
-end
-
-function checkTouchSensor(~, ~)
-    global brick
-    if brick.TouchPressed(1) || brick.TouchPressed(2)
-        disp('Touch sensor pressed. Stopping motors.');
-        brick.StopAllMotors();
-    end
-end
+CloseKeyboard();

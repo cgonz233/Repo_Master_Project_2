@@ -1,4 +1,4 @@
-% Make sure you have RoboSim already running in the 'game mode aka seeing a robot in a maze' first
+ % Make sure you have RoboSim already running in the 'game mode aka seeing a robot in a maze' first
 
 EV3_folder_path = './EV3/'; 
 % Change the above value of EV3_folder_path to your own EV3 toolbox folder in MATLAB -> HOME -> 'Set Path'
