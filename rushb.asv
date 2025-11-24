@@ -1,14 +1,9 @@
 global key
 InitKeyboard();
 
-forwardSpeed = 100;
-turnSpeed = 50;
-liftSpeed = 0;
-
 autoMode = false;
 
-brick.SetSensorType(3, 2);
-brick.SetColorMode(4, 3);
+brick.SetColorMode(3, 2);
 
 v = brick.GetBattVoltage();
 disp(v)
@@ -28,7 +23,6 @@ while true
         pause(0.3);
     end
 
-% Auto Mode
     if autoMode
         dist = brick.UltrasonicDist(4);
         fprintf("Distance: %.2f\n", dist);
@@ -44,10 +38,6 @@ while true
             pause(0.6);
         end
 
-        continue;
-    end
-
-% Sensors (Color)
     touch = brick.TouchPressed(1) && brick.TouchPressed(2);
     if touch
         brick.playTone(100,1000,10);
@@ -62,8 +52,24 @@ while true
         speedCap = 100;
     end
 
+while true
+    dist = brick.UltrasonicDist(4); 
+    fprintf("Distance: %.2f\n", dist);
 
-% Manual Mode
+    if dist > 20 
+        brick.MoveMotor('AB', 40);
+    else
+        brick.StopAllMotors('Brake');
+        pause(0.3);
+
+        brick.MoveMotor('A', 40);
+        brick.MoveMotor('B', -40);  
+        pause(0.6);                 
+    end
+
+    pause(0.05);
+end
+
     if key == 0
         brick.StopAllMotors();
         continue
@@ -74,22 +80,18 @@ while true
         case 'w'
             disp('Up Arrow Pressed!');
             brick.MoveMotor('AB', min(forwardSpeed, speedCap));
-            
         case 's'
             disp('Down Arrow Pressed!');
             brick.MoveMotor('AB', -0.33 * min(forwardSpeed, speedCap));
             brick.playTone(100, 1000, 10);
-
         case 'd'
             disp('Left Arrow Pressed!');
             brick.MoveMotorAngleRel('A', -20, 5);
             brick.MoveMotorAngleRel('B', 20, 5);
-
         case 'a'
             disp('Right Arrow Pressed!');
             brick.MoveMotorAngleRel('A', 20, 5);
             brick.MoveMotorAngleRel('B', -20, 5);
-
         case '1'
             disp('Lifting Up!');
             if liftSpeed ~= 100
@@ -98,7 +100,6 @@ while true
             else
                 % do nothing
             end
-            
         case '2'
             disp('Lifting down!');
             if liftSpeed ~= -100
@@ -107,7 +108,6 @@ while true
             else
                 % do nothing
             end
-
         case 'q'
             disp('Stopping.')
             brick.StopAllMotors();
